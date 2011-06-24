@@ -28,17 +28,6 @@ module round_corner_primitive(diameter)
 	}
 }
 
-module round_corner(x, y, angle1, angle2, radius)
-{
-	rotate(a = angle2, v = [0, 0, 1]) {
-		translate(v = [x, y, 0]) {
-			rotate(a = angle1, v = [0, 0, 1]) {
-				round_corner_primitive(radius);
-			}
-		}
-	}
-}
-
 module main_wheel(d)
 {
 	difference() {
@@ -54,14 +43,32 @@ module main_wheel(d)
 	round_handle_ends(-1);
 }
 
+module round_arm_corner(angle, yoffset)
+{
+	translate(v = [2.94 * in, yoffset, 0])
+		rotate(a = angle, v = [0, 0, 1]) 
+			round_corner_primitive(0.75 * in);
+}
+
+module round_arm_corners()
+{
+	if (want_round_corners > 0) {
+		round_arm_corner(90, 0.35 * in);
+		round_arm_corner(180, -0.35 * in);
+	}
+}
+
 module arm_primitive(x, y)
 {
 	translate(v = [x, y, 0]) {
-		polygon(points = [ [x - 2 * in, y - 0.65 * in],
-				   [x + 2.8 * in, y - 0.3 * in],
-				   [x + 2.8 * in, y + 0.3 * in],
-				   [x - 2 * in, y + 0.65 * in] ],
-			paths = [[0, 1, 2, 3]]);
+		union() {
+			polygon(points = [ [x - 2 * in, y - 0.65 * in],
+					   [x + 2.8 * in, y - 0.3 * in],
+					   [x + 2.8 * in, y + 0.3 * in],
+					   [x - 2 * in, y + 0.65 * in] ],
+				paths = [[0, 1, 2, 3]]);
+			round_arm_corners();
+		}
 	}
 }
 
@@ -83,25 +90,9 @@ module steering_wheel_without_holes()
 {
 	main_wheel(12 * in);
 	central_hub();
-	arm(1 * in, 0, 0);
-	arm(1 * in, 0, 90);
-	arm(1 * in, 0, 180);
 
-	if (want_round_corners > 0) {
-		/* left upper... */
-		round_corner(-4.94 * in, 0.38 * in, 0, 0, 0.75 * in);
-		/* left lower */
-		round_corner(-4.96 * in, -0.38 * in, -90, 0, 0.75 * in);
-		/* right upper */
-		round_corner(4.94 * in, 0.38 * in, 90, 0, 0.75 * in);
-		/* right lower */
-		round_corner(4.96 * in, -0.38 * in, 180, 0, 0.75 * in);
-
-		/* top left */
-		round_corner(4.94 * in, 0.38 * in, 90, 90, 0.75 * in);
-		/* top right */
-		round_corner(4.94 * in, -0.38 * in, 180, 90, 0.75 * in);
-	}
+	for (i = [0, 90, 180])
+		arm(1 * in, 0, i);
 }
 
 module bolt_hole(offset, angle, diameter)
@@ -122,23 +113,14 @@ module steering_wheel()
 		bolt_hole(0, 0, 0.5 * in);
 
 		/* steering wheel attachment holes */
-		bolt_hole(0.75 * in,    0, 0.26 * in);
-		bolt_hole(0.75 * in,  120, 0.26 * in);
-		bolt_hole(0.75 * in, -120, 0.26 * in);
+		for (i = [-120, 0, 120])
+			bolt_hole(0.75 * in, i, 0.26 * in);
 
 		/* perimeter screw holes */
-		bolt_hole(5.5 * in, 0, 3/16 * in);
-		bolt_hole(5.5 * in, 22.5, 3/16 * in);
-		bolt_hole(5.5 * in, -22.5, 3/16 * in);
-		bolt_hole(5.5 * in, 45, 3/16 * in);
-		bolt_hole(5.5 * in, -45, 3/16 * in);
-		bolt_hole(5.5 * in, -45 - 22.5, 3/16 * in);
-		bolt_hole(5.5 * in, 45 + 22.5, 3/16 * in);
-		bolt_hole(5.5 * in, 90, 3/16 * in);
-		bolt_hole(5.5 * in, -90, 3/16 * in);
+		for (i = [-4, -3, -2, -1, 0, 1, 2, 3, 4])
+			bolt_hole(5.5 * in, i * 180/8, 3/16 * in);
 	}
 }
 
 steering_wheel();
-
 
