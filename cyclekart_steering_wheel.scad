@@ -2,7 +2,8 @@
 
 want_round_corners = 1;
 
-in = 25.4; /* mm per inch */
+// in = 25.4; /* mm per inch */
+in = 1; /* inch per inch */
 $fn = 100;
 
 module cut_off_handle_ends(leftorright)
@@ -114,7 +115,7 @@ module steering_wheel()
 
 		/* steering wheel attachment holes */
 		for (i = [-120, 0, 120])
-			bolt_hole(0.75 * in, i, 0.26 * in);
+			bolt_hole(0.77 * in, i, 0.26 * in);
 
 		/* perimeter screw holes */
 		for (i = [-4, -3, -2, -1, 0, 1, 2, 3, 4])
